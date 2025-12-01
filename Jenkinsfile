@@ -1,51 +1,40 @@
 pipeline {
-    agent any 
-
+    agent any
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                // Mengambil kode dari repo spesifik Anda
-                // Pastikan branch-nya benar ('main' atau 'master')
                 git branch: 'main', url: 'https://github.com/zakkyanurhadi/belajar-jenkins14.git'
             }
         }
-        
-        stage('Install Dependencies') {
+        stage('Install PHP & Composer') {
             steps {
-                // Install library CI4 yang dibutuhkan
                 script {
-                    powershell 'composer install --no-interaction --prefer-dist'
+                    sh '''
+                        apt-get update
+                        apt-get install -y php-cli curl unzip
+                        
+                        # Install Composer
+                        curl -sS https://getcomposer.org/installer | php
+                        mv composer.phar /usr/local/bin/composer
+                        chmod +x /usr/local/bin/composer
+                    '''
                 }
             }
         }
-
-        stage('Verify System') {
+        stage('Composer Install') {
             steps {
-                script {
-                    // Cek versi PHP dan pastikan spark bisa jalan
-                    powershell 'php -v'
-                    powershell 'php spark routes'
-                }
+                sh 'composer install --no-interaction --prefer-dist'
             }
         }
-
-        stage('Unit Tests') {
+        stage('Run PHPUnit Tests') {
             steps {
-                script {
-                    // Buat folder untuk menampung hasil test
-                    powershell 'New-Item -ItemType Directory -Force -Path target'
-                    
-                    // Jalankan test. Jika gagal, pipeline akan merah (gagal)
-                    powershell 'vendor/bin/phpunit --log-junit target/logfile.xml'
-                }
+                sh './vendor/bin/phpunit tests'
             }
         }
-    }
-
-    post {
-        always {
-            // Ambil laporan test XML agar muncul grafik di Jenkins
-            junit 'target/*.xml'
+        stage('Run PHP') {
+            steps {
+                sh 'php index.php'
+            }
         }
     }
 }
