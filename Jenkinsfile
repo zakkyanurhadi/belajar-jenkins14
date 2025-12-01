@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Run PHPUnit Tests') {
             steps {
-                sh './vendor/bin/phpunit tests --testdox --colors=never'
+                sh './vendor/bin/phpunit tests --testdox --colors=never --no-coverage'
             }
         }
         stage('Run PHP') {
