@@ -16,5 +16,10 @@ pipeline {
                 sh './vendor/bin/phpunit tests --testdox --colors=never --no-coverage'
             }
         }
+        stage('hello') {
+            steps {
+                echo 'Hallo Zakkya'
+            }
+        }
     }
 }
